@@ -1,7 +1,4 @@
-import time
-
 import pygame
-
 pygame.init()
 def drawTable():
     for i in range(0,3):
@@ -14,7 +11,6 @@ def drawTable():
             if TABLE[i][j]==2:
                 pygame.draw.line(screen ,(120, 119, 111), (rect.topleft[0] + 50, rect.topleft[1] + 50), (rect.bottomright[0] - 50, rect.bottomright[1] - 50), 10)
                 pygame.draw.line(screen, (120, 119, 111), (rect.topright[0] - 50, rect.topright[1] + 50), (rect.bottomleft[0] + 50, rect.bottomleft[1] - 50), 10)
-
 def playerinput():
     global PLAYER_1
     for i in range(0,3):
@@ -47,29 +43,41 @@ def winning():
         if i[0]==2 and i[0]==i[1] and i[1]==i[2]:
             return True
     return False
+def allfilled():
+    for i in range(0,3):
+        for j in range(0,3):
+            if TABLE[i][j]==1:
+                return False
+    return True
+#Important variables
 X_SCREEN = 600
 Y_SCREEN = 800
 FPS = 60
 PLAYER_1 = True
+Game_open = True
+Game_start = True
+Game_running = False
+Allowed = True
 TABLE = [[1,1,1],
          [1,1,1],
          [1,1,1]]
 RECTS =[[],[],[]]
 Sound = pygame.mixer.Sound("simple sound.wav")
+#Texts
 Render = pygame.font.Font(pygame.font.get_default_font(), 25)
 instruct = Render.render("Press P to play, Q to quit..",False, (47, 56, 49))
 instruct_rect = instruct.get_rect(center=(200,200))
 Title_renderer = pygame.font.SysFont("inkfree",50, True, True)
 Title = Title_renderer.render("TIC-TAC-TOE",False,(46, 70, 74))
+instruct2 = Render.render("Press M to go to main menu and Q to quit.",False,(46, 70, 74))
+instruct2_rect = instruct2.get_rect(center=(300, 150))
 Title_rect = Title.get_rect(center=(300, 100))
+#setting up the screen
 screen = pygame.display.set_mode((X_SCREEN,Y_SCREEN))
 pygame.display.set_caption("TIC-TAC-TOE")
 BG = pygame.image.load("tic-tac-toeBG.jpg")
 BG = pygame.transform.scale(BG, (X_SCREEN,Y_SCREEN)).convert_alpha()
 clock = pygame.time.Clock()
-Game_open = True
-Game_start = True
-Game_running = False
 while Game_open:
     if Game_start:
         for event in pygame.event.get():
@@ -82,6 +90,7 @@ while Game_open:
                 if event.key==pygame.K_q:
                     Game_open = False
         screen.blit(BG, (0,0))
+        screen.blit(Title,Title_rect)
         screen.blit(instruct, instruct_rect)
         pygame.display.update()
         clock.tick(FPS)
@@ -93,14 +102,22 @@ while Game_open:
             screen.fill((87, 167, 181))
             screen.blit(Title, Title_rect)
             drawTable()
-            playerinput()
-            result = winning()
-            if result:
-               time.sleep(2)
-               Game_running = False
-               TABLE = [[1, 1, 1],
-                        [1, 1, 1],
-                        [1, 1, 1]]
-               RECTS = [[], [], []]
+            if Allowed:
+                playerinput()
+            if winning() or allfilled():
+               Allowed = False
+               screen.blit(instruct2,instruct2_rect)
+               keys = pygame.key.get_pressed()
+               if keys[pygame.K_m]:
+                   Game_running = False
+                   PLAYER_1 = True
+                   Allowed = True
+                   TABLE = [[1, 1, 1],
+                            [1, 1, 1],
+                            [1, 1, 1]]
+                   RECTS = [[], [], []]
+               if keys[pygame.K_q]:
+                   Game_running = False
+                   Game_open = False
             pygame.display.update()
             clock.tick(FPS)
